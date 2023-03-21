@@ -1,4 +1,4 @@
-Name:
-NetID:
+Name: Armita Jamshidi
+NetID: aaj34
 
-Challenges Attempted (Tier I/II/III): 
+Challenges Attempted  

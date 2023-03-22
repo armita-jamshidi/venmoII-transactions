@@ -100,6 +100,16 @@ class DatabaseDriver(object):
             users.append({"id": row[0], "name": row[1], "username:": row[2]})
 
         return users
+    
+    def get_user_by_id(self, user_id):
+         """
+         Using SQL, gets a user
+         """
+         user = self.conn.execute("SELECT * FROM users WHERE id = ?;", (user_id,))
+         for row in user: 
+             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
+         
+         return None
 
     def create_user(self, name, username, balance):
         """
@@ -107,15 +117,15 @@ class DatabaseDriver(object):
         """
         if not balance:
             c = self.conn.execute("""
-            INSERT INTO users (name, username, balance, transactions)
-            VALUES (?, ?, 0, []);
+            INSERT INTO users (name, username, balance)
+            VALUES (?, ?, 0);
             """, (name, username))
             
         else:
             print("reached here 2")
             c = self.conn.execute("""
-            INSERT INTO users (name, username, balance, transactions)
-            VALUES (?, ?, ?, []);
+            INSERT INTO users (name, username, balance)
+            VALUES (?, ?, ?);
             """, (name, username, balance))
 
         self.conn.commit()
@@ -123,15 +133,7 @@ class DatabaseDriver(object):
         return c.lastrowid
         
 
-    def get_user_by_id(self, user_id):
-         """
-         Using SQL, gets a user
-         """
-         user = self.conn.execute("SELECT * FROM users WHERE id = ?;", (user_id,))
-         for row in user: 
-             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3], "transactions": row[4]}
-         
-         return None
+
             
     def delete_user_by_id(self, user_id):
         """

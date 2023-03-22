@@ -30,6 +30,7 @@ def create_user():
 
     id = DB.create_user(name, username, balance)
     user = DB.get_user_by_id(id)
+    user["transactions"] = []
 
     return json.dumps(user), 201
 

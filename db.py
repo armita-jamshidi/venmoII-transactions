@@ -108,7 +108,6 @@ class DatabaseDriver(object):
         Using SQL, creates user, and returns everything about the user
         """
         if not balance:
-            print("reached here")
             c = self.conn.execute("""
             INSERT INTO users (name, username, balance, transactions)
             VALUES (?, ?, 0, []);
@@ -130,13 +129,18 @@ class DatabaseDriver(object):
          """
          Using SQL, gets a user
          """
-         user = self.conn.execute("SELECT * FROM users WHERE ID = ?", (user_id,))
+         user = self.conn.execute("SELECT * FROM users WHERE id = ?;", (user_id,))
          for row in user: 
-             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3], "transactions": row[4]}
+             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
          
          return None
             
-             
+    def delete_user_by_id(self, user_id):
+        """
+        Using SQL, deletes a user
+        """    
+        user = self.conn.execute("DELETE FROM users WHERE id = ?;", (user_id,))
+        self.conn.commit()
 
 # Only <=1 instance of the database driver
 # exists within the app at all times

@@ -47,7 +47,7 @@ def get_user(user_id):
     user["transactions"] = DB.get_transactions_by_id(user_id)
     return json.dumps(user), 200
 
-@app.route("/api/user/<int:user_id>/")
+@app.route("/api/users/<int:user_id>/", methods=["DELETE"])
 def delete_user(user_id):
     """
     Endpoint for deleting a specific user
@@ -55,7 +55,13 @@ def delete_user(user_id):
     user = DB.get_user_by_id(user_id)
     if user is None:
         return json.dumps({"error": "user not found!"}), 404
+    DB.delete_user_by_id(user_id)
 
+    a = DB.delete_transactions_by_id(user_id)
+    if a is None:
+        user["transactions"] = []
+    else:
+        user["transactions"] = a
     return json.dumps(user), 200
 
 @app.route("/api/send/",methods=["POST"])

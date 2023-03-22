@@ -73,6 +73,17 @@ class DatabaseDriver(object):
         for row in users:
             transactions.append({"id": row[0], "timestamp": row[1], "sender_id": row[2], "receiver_id": row[3], "amount": row[4], "accepted": row[5]})
         return transactions
+    
+    def delete_transactions_by_id(self, user_id):
+        """
+        Using SQL, deletes all the transactions including the user
+        """
+        user = self.conn.execute("DELETE FROM transactions WHERE sender_id=? OR receiver_id=?;", (user_id, user_id))
+        self.conn.commit()
+        for row in user: 
+             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
+        return None
+        
 # ----------------------------USERS---------------------------------------------
     def create_users_table(self):
         """
@@ -149,6 +160,9 @@ class DatabaseDriver(object):
         """    
         user = self.conn.execute("DELETE FROM users WHERE id = ?;", (user_id,))
         self.conn.commit()
+        for row in user: 
+             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
+         
 
     def send_money(self, sender_id, receiver_id, amount):
         """

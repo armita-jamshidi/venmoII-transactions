@@ -55,10 +55,22 @@ def delete_user(user_id):
 
     return json.dumps(user), 200
 
+@app.route("/api/send/",methods=["POST"])
+def send_money():
+    """
+    Endpoint for sending money from one user to another
+    """
+    body = json.loads(request.data)
+    sender_id = body.get("sender_id")
+    receiver_id = body.get("receiver_id")
+    amount = body.get("amount")
+
+    response = DB.send_money(sender_id, receiver_id, amount)
+    return json.dumps(response), 200
+
 @app.route("/")
 def hello_world():
     return "Hello world!"
-
 
 # your routes here
 

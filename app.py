@@ -42,6 +42,9 @@ def get_user(user_id):
     user = DB.get_user_by_id(user_id)
     if user is None:
         return json.dumps({"error": "User is not found!"}), 404
+    
+    #adding transactions manually as a list
+    user["transactions"] = DB.get_transactions_by_id(user_id)
     return json.dumps(user), 200
 
 @app.route("/api/user/<int:user_id>/")

@@ -28,10 +28,10 @@ class DatabaseDriver(object):
         #     "app.db", check_same_thread=False
         # )
     
-        # self.delete_transactions_table()
+        self.delete_transactions_table()
         self.create_transactions_table()
 
-        # self.delete_users_table()
+        self.delete_users_table()
         self.create_users_table()
       
 
@@ -50,7 +50,7 @@ class DatabaseDriver(object):
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp TEXT NOT NULL,
                     sender_id INTEGER NOT NULL,
-                    reciever_id INTEGER NOT NULL,
+                    receiver_id INTEGER NOT NULL,
                     amount INTEGER NOT NULL,
                     accepted INTEGER
                 );"""
@@ -63,6 +63,16 @@ class DatabaseDriver(object):
         Using SQL, deletes a transaction table
         """
         self.conn.execute("DROP TABLE IF EXISTS transactions;")
+
+    def get_transactions_by_id(self, user_id):
+        """
+        Using SQL, gets all the transactions involving a user
+        """
+        users = self.conn.execute("SELECT * FROM transactions WHERE sender_id = ? OR receiver_id = ?;", (user_id, user_id))
+        transactions = []
+        for row in users:
+            transactions.append({"id": row[0], "timestamp": row[1], "sender_id": row[2], "receiver_id": row[3], "amount": row[4], "accepted": row[5]})
+        return transactions
 # ----------------------------USERS---------------------------------------------
     def create_users_table(self):
         """
@@ -132,8 +142,6 @@ class DatabaseDriver(object):
         #returns the id of the user that was inserted
         return c.lastrowid
         
-
-
             
     def delete_user_by_id(self, user_id):
         """

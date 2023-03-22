@@ -169,18 +169,29 @@ class DatabaseDriver(object):
         """
         Records transaction information in database
         """
-        time = datetime.now()
-        trans = self.conn.execute("INSERT INTO transactions (timestamp, sender_id, receiver_id, amount, accepted) VALUES (?, ?, ?, ?, ?);", 
+        # time = datetime.now()
+        time = "4pm"
+
+        #below code returns the id of the most recent add
+        t = self.conn.execute("INSERT INTO transactions (timestamp, sender_id, receiver_id, amount, accepted) VALUES (?, ?, ?, ?, ?);", 
                           (time, sender_id, receiver_id, amount, accepted))
-        for row in trans: 
-            return {"id": row[0], "timestamp": row[1], "sender_id": row[2], "receiver_id": row[3], "amount": row[4], "message": message, "accepted": row[5]}
         self.conn.commit()
+
+        #t.lastrowid is the id of the most recently added row
+        return ({"id": t.lastrowid, "timestamp": time, "sender_id": sender_id, "receiver_id": receiver_id, "amount":amount, "message": message, "accepted": accepted})
+        
+    
     def send_money(self, sender_id, receiver_id, amount, message, accepted):
         """
         Using SQL, sends money from one user to another
         """
-        sender_bal = self.conn.execute("SELECT balance FROM users WHERE id=?;", (sender_id)) 
-        receiver_bal = self.conn.execute("SELECT balance FROM users WHERE id=?;", (receiver_id)) 
+        sender = self.conn.execute("SELECT * FROM users WHERE id=?;", (sender_id,))
+        for row in sender: 
+            sender_bal = row[3]
+        receiver = self.conn.execute("SELECT * FROM users WHERE id=?;", (receiver_id,)) 
+        for row in receiver:
+            receiver_bal = receiver[3]
+
         if sender_bal < amount:
             return None
         sender_bal = sender_bal - amount
@@ -188,6 +199,7 @@ class DatabaseDriver(object):
 
         self.conn.execute("UPDATE users SET balance = ? WHERE id = ?;", (receiver_bal, receiver_id))
         self.conn.execute("UPDATE users SET balance = ? WHERE id = ?;", (sender_bal, sender_id))
+        
         self.conn.commit()
         #return 1 if send_money was successful - need to call record_transaction for final answer
         return 1

@@ -76,15 +76,21 @@ def send_money():
     message = body.get("message")
     accepted = body.get("accepted")
 
+    #if accepted is none, then mark the transaction but don't change anyone's balance
+    #return the transaction
     if accepted is None:
-        response = DB.record_transaction(sender_id, receiver_id, amount, message, accepted)
+        transaction_null = DB.record_transaction(sender_id, receiver_id, amount, message, accepted)
+        return json.dumps(transaction_null), 200
+    
+    #otherwise, change people's balance, record the transaction, and return it
     else:
-        response = DB.send_money(sender_id, receiver_id, amount, message, accepted)
+        transaction_true = DB.record_transaction(sender_id, receiver_id, amount, message, accepted)
+        is_1 = DB.send_money(sender_id, receiver_id, amount, message, accepted)
 
-    if response is None:
+    if is_1 is None:
         return json.dumps({"error": "sender does not have enough money in their account"}), 403
     
-    return json.dumps(response), 200
+    return json.dumps(transaction_true), 200
 
 @app.route("/")
 def hello_world():

@@ -64,7 +64,7 @@ def delete_user(user_id):
         user["transactions"] = a
     return json.dumps(user), 200
 
-@app.route("/api/send/",methods=["POST"])
+@app.route("/api/transactions/",methods=["POST"])
 def send_money():
     """
     Endpoint for sending money from one user to another
@@ -73,10 +73,16 @@ def send_money():
     sender_id = body.get("sender_id")
     receiver_id = body.get("receiver_id")
     amount = body.get("amount")
+    message = body.get("message")
+    accepted = body.get("accepted")
 
-    response = DB.send_money(sender_id, receiver_id, amount)
+    if accepted is None:
+        response = DB.record_transaction(sender_id, receiver_id, amount, message, accepted)
+    else:
+        response = DB.send_money(sender_id, receiver_id, amount, message, accepted)
+
     if response is None:
-        return json.dumps({"error": "sender does not have enough money in their account"}), 400
+        return json.dumps({"error": "sender does not have enough money in their account"}), 403
     
     return json.dumps(response), 200
 

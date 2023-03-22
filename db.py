@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import datetime
 
 # From: https://goo.gl/YzypOI
 def singleton(cls):
@@ -28,10 +29,10 @@ class DatabaseDriver(object):
         #     "app.db", check_same_thread=False
         # )
     
-        self.delete_transactions_table()
+        # self.delete_transactions_table()
         self.create_transactions_table()
 
-        self.delete_users_table()
+        # self.delete_users_table()
         self.create_users_table()
       
 
@@ -164,14 +165,33 @@ class DatabaseDriver(object):
              return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
          
 
-    def send_money(self, sender_id, receiver_id, amount):
+    def record_transaction(self, sender_id, receiver_id, amount, message, accepted):
+        """
+        Records transaction information in database
+        """
+        time = datetime.now()
+        trans = self.conn.execute("INSERT INTO transactions (timestamp, sender_id, receiver_id, amount, accepted) VALUES (?, ?, ?, ?, ?);", 
+                          (time, sender_id, receiver_id, amount, accepted))
+        for row in trans: 
+            return {"id": row[0], "timestamp": row[1], "sender_id": row[2], "receiver_id": row[3], "amount": row[4], "message": message, "accepted": row[5]}
+        self.conn.commit()
+    def send_money(self, sender_id, receiver_id, amount, message, accepted):
         """
         Using SQL, sends money from one user to another
         """
         sender_bal = self.conn.execute("SELECT balance FROM users WHERE id=?;", (sender_id)) 
+        receiver_bal = self.conn.execute("SELECT balance FROM users WHERE id=?;", (receiver_id)) 
         if sender_bal < amount:
             return None
         sender_bal = sender_bal - amount
+        receiver_bal = receiver_bal + amount
+
+        self.conn.execute("UPDATE users SET balance = ? WHERE id = ?;", (receiver_bal, receiver_id))
+        self.conn.execute("UPDATE users SET balance = ? WHERE id = ?;", (sender_bal, sender_id))
+        self.conn.commit()
+        #return 1 if send_money was successful - need to call record_transaction for final answer
+        return 1
+
 
 
 # Only <=1 instance of the database driver

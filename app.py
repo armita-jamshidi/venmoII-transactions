@@ -4,7 +4,6 @@ import json
 import db
 from flask import Flask
 from flask import request
-
 #DB is DatabaseDriver object
 DB = db.DatabaseDriver()
 
@@ -66,6 +65,9 @@ def send_money():
     amount = body.get("amount")
 
     response = DB.send_money(sender_id, receiver_id, amount)
+    if response is None:
+        return json.dumps({"error": "sender does not have enough money in their account"}), 400
+    
     return json.dumps(response), 200
 
 @app.route("/")

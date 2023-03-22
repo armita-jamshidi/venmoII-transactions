@@ -22,16 +22,16 @@ class DatabaseDriver(object):
     def __init__(self):
         #connecting databse to program
         self.conn = sqlite3.connect(
-             "users.db", check_same_thread=False
+             "todo.db", check_same_thread=False
         )
         # self.conn = sqlite3.connect(
         #     "app.db", check_same_thread=False
         # )
     
-        self.delete_transactions_table()
+        # self.delete_transactions_table()
         self.create_transactions_table()
 
-        self.delete_users_table()
+        # self.delete_users_table()
         self.create_users_table()
       
 
@@ -53,7 +53,7 @@ class DatabaseDriver(object):
                     reciever_id INTEGER NOT NULL,
                     amount INTEGER NOT NULL,
                     accepted INTEGER
-                )"""
+                );"""
             )
         except Exception as e:
             print(e)
@@ -63,7 +63,6 @@ class DatabaseDriver(object):
         Using SQL, deletes a transaction table
         """
         self.conn.execute("DROP TABLE IF EXISTS transactions;")
-
 # ----------------------------USERS---------------------------------------------
     def create_users_table(self):
         """
@@ -78,7 +77,6 @@ class DatabaseDriver(object):
                     name TEXT NOT NULL,
                     username TEXT NOT NULL,
                     balance INTEGER NOT NULL
-                    transactions FOREIGN KEY (transaction_id) REFERENCES transactions
                 );
                 """
             )
@@ -131,7 +129,7 @@ class DatabaseDriver(object):
          """
          user = self.conn.execute("SELECT * FROM users WHERE id = ?;", (user_id,))
          for row in user: 
-             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3]}
+             return {"id": row[0], "name": row[1], "username": row[2], "balance": row[3], "transactions": row[4]}
          
          return None
             
@@ -141,6 +139,16 @@ class DatabaseDriver(object):
         """    
         user = self.conn.execute("DELETE FROM users WHERE id = ?;", (user_id,))
         self.conn.commit()
+
+    def send_money(self, sender_id, receiver_id, amount):
+        """
+        Using SQL, sends money from one user to another
+        """
+        sender_bal = self.conn.execute("SELECT balance FROM users WHERE id=?;", (sender_id)) 
+        if sender_bal < amount:
+            return None
+        sender_bal = sender_bal - amount
+
 
 # Only <=1 instance of the database driver
 # exists within the app at all times
